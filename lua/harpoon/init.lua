@@ -116,6 +116,7 @@ function Harpoon:delete_list(name)
 
     if name == Config.DEFAULT_LIST then
         print("Cannot delete default list")
+        return
     end
 
     self.data:clear_list_data(name)
