@@ -131,10 +131,7 @@ function Harpoon:_for_each_list(cb)
         return
     end
 
-    names = {}
-
     for name, list in pairs(lists) do
-        table.insert(names, name)
         local list_config = Config.get_config(self.config, name)
         cb(list, list_config, name)
     end
