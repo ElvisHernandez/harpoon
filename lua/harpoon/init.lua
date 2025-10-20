@@ -53,14 +53,6 @@ function Harpoon:new()
     return harpoon
 end
 
-local function getTableSize(t)
-    local count = 0
-    for _, _ in pairs(t) do
-        count = count + 1
-    end
-    return count
-end
-
 ---@param name string?
 ---@return HarpoonList
 function Harpoon:list(name)
