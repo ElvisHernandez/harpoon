@@ -1,6 +1,7 @@
 local Buffer = require("harpoon.buffer")
 local Logger = require("harpoon.logger")
 local Extensions = require("harpoon.extensions")
+local Config = require("harpoon.config")
 
 ---@class HarpoonToggleOptions
 ---@field border? any this value is directly passed to nvim_open_win
@@ -143,6 +144,13 @@ function HarpoonUI:toggle_quick_menu(list, opts)
 
     -- grab the current file before opening the quick menu
     local current_file = vim.api.nvim_buf_get_name(0)
+
+    if list then
+        opts.title = list.name
+        if list.name == Config.DEFAULT_LIST then
+            opts.title = "default"
+        end
+    end
 
     Logger:log("ui#toggle_quick_menu#opening", list and list.name)
     local win_id, bufnr = self:_create_window(opts)

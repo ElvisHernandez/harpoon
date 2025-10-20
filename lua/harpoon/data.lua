@@ -1,4 +1,5 @@
 local Path = require("plenary.path")
+local Config = require("harpoon.config")
 
 local data_path = string.format("%s/harpoon", vim.fn.stdpath("data"))
 local ensured_data_path = false
@@ -133,6 +134,53 @@ function Data:update(key, name, values)
     end
     self:_get_data(key, name)
     self._data[key][name] = values
+end
+
+---@param name string
+function Data:clear_list_data(name)
+    local key = self.config.settings.key()
+    self._data[key][name] = nil
+    self._data[key][Config.CURRENT_LIST_NAME] = Config.DEFAULT_LIST
+
+    ok, _ = pcall(write_data, self._data, self.config)
+
+    if ok then
+        self:sync()
+        vim.notify(
+            name .. " successfully deleted",
+            vim.log.levels.INFO,
+            { title = "Harpoon Lists" }
+        )
+    end
+end
+
+function Data:get_current_list_name()
+    local key = self.config.settings.key()
+    local current_list_name = self._data[key][Config.CURRENT_LIST_NAME]
+        or Config.DEFAULT_LIST
+
+    return current_list_name
+end
+
+function Data:set_current_list_name(name)
+    local key = self.config.settings.key()
+
+    if name == "default" then
+        self._data[key][Config.CURRENT_LIST_NAME] = Config.DEFAULT_LIST
+    else
+        self._data[key][Config.CURRENT_LIST_NAME] = name
+    end
+
+    ok, _ = pcall(write_data, self._data, self.config)
+
+    if ok then
+        self:sync()
+        vim.notify(
+            "Set " .. name .. " to current list",
+            vim.log.levels.INFO,
+            { title = "Harpoon Lists" }
+        )
+    end
 end
 
 function Data:sync()

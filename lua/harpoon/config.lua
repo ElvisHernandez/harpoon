@@ -10,9 +10,12 @@ end
 
 local M = {}
 local DEFAULT_LIST = "__harpoon_files"
-M.DEFAULT_LIST = DEFAULT_LIST
+local CURRENT_LIST_NAME = "__current_list_name"
 
----@alias HarpoonListItem {value: any, context: any}
+M.DEFAULT_LIST = DEFAULT_LIST
+M.CURRENT_LIST_NAME = CURRENT_LIST_NAME
+
+---@alias HarpoonListItem { context: any}
 ---@alias HarpoonListFileItem {value: string, context: {row: number, col: number}}
 ---@alias HarpoonListFileOptions {split: boolean, vsplit: boolean, tabedit: boolean}
 
