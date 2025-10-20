@@ -64,7 +64,7 @@ end
 ---@param name string?
 ---@return HarpoonList
 function Harpoon:list(name)
-    name = name or Config.DEFAULT_LIST
+    name = name or self.data:get_current_list_name()
 
     local key = self.config.settings.key()
     local lists = self.lists[key]
@@ -83,8 +83,6 @@ function Harpoon:list(name)
     end
 
     local data = self.data:data(key, name)
-    -- print("The data: " .. table.concat(data, ":"))
-    -- print("The name: " .. name .. " | key: " .. key)
     local list_config = Config.get_config(self.config, name)
 
     local list = List.decode(list_config, name, data)
@@ -97,11 +95,21 @@ end
 function Harpoon:show_lists()
     local key = self.config.settings.key()
     local data = self.data._data[key]
+    local current_list_name = self.data:get_current_list_name()
 
     local list_names = {}
 
     for name, _ in pairs(data) do
-        table.insert(list_names, " - " .. name)
+        local is_current_list = name == current_list_name
+
+        if name ~= Config.CURRENT_LIST_NAME then
+            suffix = is_current_list and " (current)" or ""
+            if name == Config.DEFAULT_LIST then
+                table.insert(list_names, " - " .. "default" .. suffix)
+            else
+                table.insert(list_names, " - " .. name .. suffix)
+            end
+        end
     end
 
     vim.notify(
@@ -112,15 +120,14 @@ function Harpoon:show_lists()
 end
 
 function Harpoon:delete_list(name)
-    name = name or Config.DEFAULT_LIST
+    name = name or self.data:get_current_list_name()
 
     if name == Config.DEFAULT_LIST then
         print("Cannot delete default list")
-        return
     end
 
-    local key = self.config.settings.key()
-    self.data:clear_list_data(key, name)
+    self.data:clear_list_data(name)
+    self.lists = {}
 end
 
 ---@param cb fun(list: HarpoonList, config: HarpoonPartialConfigItem, name: string)
@@ -131,7 +138,10 @@ function Harpoon:_for_each_list(cb)
         return
     end
 
+    names = {}
+
     for name, list in pairs(lists) do
+        table.insert(names, name)
         local list_config = Config.get_config(self.config, name)
         cb(list, list_config, name)
     end
