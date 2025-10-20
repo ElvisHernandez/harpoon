@@ -135,6 +135,22 @@ function Data:update(key, name, values)
     self._data[key][name] = values
 end
 
+---@param key string
+---@param name string
+function Data:clear_list_data(key, name)
+    self._data[key][name] = nil
+    ok, _ = pcall(write_data, self._data, self.config)
+
+    if ok then
+        self:sync()
+        vim.notify(
+            name .. " successfully deleted",
+            vim.log.levels.INFO,
+            { title = "Harpoon Lists" }
+        )
+    end
+end
+
 function Data:sync()
     if self.has_error then
         return

@@ -53,6 +53,14 @@ function Harpoon:new()
     return harpoon
 end
 
+local function getTableSize(t)
+    local count = 0
+    for _, _ in pairs(t) do
+        count = count + 1
+    end
+    return count
+end
+
 ---@param name string?
 ---@return HarpoonList
 function Harpoon:list(name)
@@ -67,6 +75,7 @@ function Harpoon:list(name)
     end
 
     local existing_list = lists[name]
+    local key = self.config.settings.key()
 
     if existing_list then
         self._extensions:emit(Extensions.event_names.LIST_READ, existing_list)
@@ -74,6 +83,8 @@ function Harpoon:list(name)
     end
 
     local data = self.data:data(key, name)
+    -- print("The data: " .. table.concat(data, ":"))
+    -- print("The name: " .. name .. " | key: " .. key)
     local list_config = Config.get_config(self.config, name)
 
     local list = List.decode(list_config, name, data)
@@ -81,6 +92,35 @@ function Harpoon:list(name)
     lists[name] = list
 
     return list
+end
+
+function Harpoon:show_lists()
+    local key = self.config.settings.key()
+    local data = self.data._data[key]
+
+    local list_names = {}
+
+    for name, _ in pairs(data) do
+        table.insert(list_names, " - " .. name)
+    end
+
+    vim.notify(
+        "Available harpoon lists:\n" .. table.concat(list_names, "\n"),
+        vim.log.levels.INFO,
+        { title = "Harpoon Lists" }
+    )
+end
+
+function Harpoon:delete_list(name)
+    name = name or Config.DEFAULT_LIST
+
+    if name == Config.DEFAULT_LIST then
+        print("Cannot delete default list")
+        return
+    end
+
+    local key = self.config.settings.key()
+    self.data:clear_list_data(key, name)
 end
 
 ---@param cb fun(list: HarpoonList, config: HarpoonPartialConfigItem, name: string)
